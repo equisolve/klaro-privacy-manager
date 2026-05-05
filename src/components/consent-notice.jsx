@@ -1,6 +1,7 @@
 import React from 'react';
 import ConsentModal from './consent-modal';
 import { getPurposes } from '../utils/config';
+import { gpcConfig } from '../utils/gpc';
 import Text from './text';
 import { asTitle } from '../utils/strings';
 
@@ -260,6 +261,15 @@ export default class ConsentNotice extends React.Component {
                         />
                     </p>
                     {testing && <p>{t(['consentNotice', 'testing'])}</p>}
+                    {manager.gpcActive && gpcConfig(config).showAcknowledgment && (
+                        <p
+                            className="cn-gpc-acknowledgment"
+                            role="status"
+                            aria-live="polite"
+                        >
+                            {t(['consentNotice', 'gpcAcknowledgment'])}
+                        </p>
+                    )}
                     {changesText}
                     <div className="cn-ok">
                         {!hideLearnMore && learnMoreLink()}

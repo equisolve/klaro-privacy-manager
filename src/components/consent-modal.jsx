@@ -3,6 +3,7 @@ import { Close } from './icons';
 import Services from './services';
 import Purposes from './purposes';
 import Text from './text';
+import { gpcConfig } from '../utils/gpc';
 
 export default class ConsentModal extends React.Component {
     componentDidMount() {
@@ -141,6 +142,15 @@ export default class ConsentModal extends React.Component {
                             )}
                         />
                     </p>
+                    {manager.gpcActive && gpcConfig(config).showAcknowledgment && (
+                        <p
+                            className="cm-gpc-acknowledgment"
+                            role="status"
+                            aria-live="polite"
+                        >
+                            {t(['consentModal', 'gpcAcknowledgment'])}
+                        </p>
+                    )}
                 </div>
                 <div className="cm-body">{servicesOrPurposes}</div>
                 <div className="cm-footer">

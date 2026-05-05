@@ -90,6 +90,48 @@ if (manager.getConsent('hotjar')) hotjar.initialize(HOTJAR_ID);
 
 The consent manager is configured using a config dictionary, which you typically define in a separate JS file. To learn more, simply read the [annotated example config](dist/config.js), which contains descriptions of all valid config options and parameters.
 
+### Global Privacy Control (GPC)
+
+This fork adds opt-in support for the [Global Privacy Control](https://globalprivacycontrol.org/) signal, the browser-emitted opt-out aligned with the CCPA/CPRA "Do Not Sell or Share" right.
+
+When GPC handling is enabled, Klaro will:
+
+1. Detect `navigator.globalPrivacyControl === true` at load time.
+2. Force services that fall under "sale or share" to default opted-out, overriding both the site default and any previously stored consent for those services.
+3. Render an acknowledgment that the GPC signal was received and honored (CCPA/CPRA requires confirmation that a universal opt-out signal was processed).
+
+Enable in your config:
+
+```js
+var klaroConfig = {
+    // ...
+    gpc: {
+        enabled: true,
+        // Purposes that constitute "sale or share" under your taxonomy.
+        // Any service whose `purposes` includes one of these is opted out
+        // when GPC is detected. Defaults to ['advertising', 'marketing'].
+        optOutPurposes: ['advertising', 'marketing'],
+        // Show the acknowledgment banner/notice. Defaults to true. Disabling
+        // is not recommended — CCPA/CPRA requires the user be informed that
+        // their signal was processed.
+        showAcknowledgment: true,
+    },
+    services: [
+        {
+            name: 'youtube',
+            purposes: ['marketing'],
+            // Optional per-service override. `respectGPC: false` keeps the
+            // service active even when GPC is on. `respectGPC: true` forces
+            // it off regardless of `purposes`.
+        },
+    ],
+};
+```
+
+Required services (`required: true`) are not affected by GPC, since they fall outside the sale/share scope. The user can still re-enable an opted-out service explicitly via the preference manager — that interaction is treated as overriding the universal signal for that session.
+
+GPC depends on JavaScript executing in the browser. Sites should consider providing a non-JS opt-out path (e.g., a static "Do Not Sell or Share My Personal Information" link) for visitors with JavaScript disabled.
+
 ## Using Klaro via NPM
 
 Klaro is also available as a Node.js module via npm:

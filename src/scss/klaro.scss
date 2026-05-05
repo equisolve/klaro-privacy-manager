@@ -249,6 +249,14 @@
                         padding-right: 20px;
                     }
                 }
+
+                p.cm-gpc-acknowledgment {
+                    border-left: 3px solid currentColor;
+                    padding: 0.5em 0.75em;
+                    margin-top: 0.75em;
+                    opacity: 0.95;
+                    font-size: 0.95em;
+                }
             }
 
             .cm-body {
@@ -385,6 +393,14 @@
 
             p.cn-changes {
                 text-decoration: underline;
+            }
+
+            p.cn-gpc-acknowledgment {
+                border-left: 3px solid currentColor;
+                padding: 0.5em 0.75em;
+                margin: 0.5em 0;
+                opacity: 0.95;
+                font-size: 0.95em;
             }
 
             .cn-learn-more {

@@ -1,5 +1,6 @@
 import {getCookies, deleteCookie} from './utils/cookies'
 import {dataset, applyDataset} from './utils/compat'
+import {gpcActive, serviceAffectedByGPC} from './utils/gpc'
 import stores, { SessionStorageStore } from './stores'
 
 export default class ConsentManager {
@@ -86,12 +87,23 @@ export default class ConsentManager {
     }
 
     getDefaultConsent(service){
+        // GPC: when the user's browser is asserting Global Privacy Control,
+        // services that fall under "sale/share" must default to opted-out
+        // regardless of the site's default. Required services are unaffected.
+        if (serviceAffectedByGPC(service, this.config))
+            return false
         let consent = service.default || service.required
         if (consent === undefined)
             consent = this.config.default
         if (consent === undefined)
             consent = false
         return consent
+    }
+
+    // True when GPC is detected and the site config has GPC handling enabled.
+    // Used by UI components to render an acknowledgment.
+    get gpcActive(){
+        return gpcActive(this.config)
     }
 
     changeAll(value){
@@ -135,6 +147,18 @@ export default class ConsentManager {
             this.consents = JSON.parse(decodeURIComponent(consentData))
             this._checkConsents()
             this.notify('consents', this.consents)
+        }
+        // GPC: even if a returning user previously consented to a sale/share
+        // service, the GPC signal asserts withdrawal. Force those services
+        // back to opted-out. The user can still re-enable explicitly via the
+        // preference manager — that is treated as an interaction that
+        // overrides the universal signal for the duration of that session.
+        if (gpcActive(this.config)){
+            for (let i = 0; i < this.config.services.length; i++){
+                const service = this.config.services[i]
+                if (serviceAffectedByGPC(service, this.config))
+                    this.consents[service.name] = false
+            }
         }
         return this.consents
     }
